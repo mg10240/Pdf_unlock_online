@@ -188,12 +188,15 @@
     }
 
     function showError(err) {
-      const msg = (err && err.stack) ? err.stack : (err?.message || String(err));
-      errorMessage.textContent = msg;
-      errorBox.style.display = 'block';
-      console.error('🔴 처리 중 오류 발생:', err);
-      resetUI();
-    }
+  const msg = (err && err.stack) ? err.stack : (err?.message || String(err));
+  errorMessage.textContent = msg;
+  errorBox.style.display = 'block';
+  console.error('🔴 처리 중 오류 발생:', err);
+
+  alert('🚫 오류가 발생했습니다:\n\n' + msg);
+  resetUI();
+}
+
 
     async function initializeQpdf() {
       try {
