@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>🔓 PDF 권한 제거기 (QPDF WASM)</title>
+  <title>🔓 PDF 권한 제거기</title>
   <style>
     :root {
       --bg-light: #f9fafb;
@@ -31,18 +31,12 @@
       min-height: 100vh;
       margin: 0;
       padding: 1rem;
-      background-color: var(--bg-light);
-      color: var(--text-light);
-    }
-    html[data-theme='dark'] body {
-      background-color: var(--bg-dark);
-      color: var(--text-dark);
     }
     .container {
       background: white;
       padding: 2rem;
       border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       width: 100%;
       max-width: 480px;
       text-align: center;
@@ -117,9 +111,6 @@
       height: 12px;
       margin-top: 1rem;
     }
-    html[data-theme='dark'] #progressContainer {
-      background-color: #6b7280;
-    }
     #progressBar {
       height: 100%;
       background-color: var(--primary);
@@ -139,8 +130,9 @@
       border-radius: 8px;
       padding: 1rem;
       font-size: 0.9rem;
-      max-height: 150px;
+      max-height: 200px;
       overflow-y: auto;
+      text-align: left;
     }
     html[data-theme='dark'] #errorBox {
       background: #7f1d1d;
@@ -151,9 +143,10 @@
 <body>
   <div class="container">
     <h1>🔓 PDF 권한 제거기</h1>
-    <p>비밀번호가 걸린 PDF에서 권한을 제거해 다운로드하세요. 모든 처리는 브라우저 내에서 이루어집니다.</p>
+    <p>비밀번호가 걸린 PDF의 권한을 제거하고 새 파일로 저장하세요. 브라우저 내에서만 처리됩니다.</p>
     <input type="file" id="pdfInput" accept="application/pdf" />
-    <button id="processBtn" disabled>권한 제거 실행</button>
+    <button id="processBtn" disabled>🔧 권한 제거</button>
+
     <div id="loading">
       <div class="spinner"></div>
       <p>처리 중입니다...</p>
@@ -161,12 +154,14 @@
         <div id="progressBar"></div>
       </div>
     </div>
+
     <div id="result">
-      <p>✅ 처리 완료!</p>
-      <a id="downloadLink" href="#" download>📥 다운로드 링크</a>
+      <p>✅ 성공적으로 처리되었습니다!</p>
+      <a id="downloadLink" href="#" download>📥 다운로드</a>
     </div>
+
     <div id="errorBox">
-      <strong>⚠ 오류 메시지:</strong>
+      <strong>⚠ 오류 발생:</strong>
       <pre id="errorMessage"></pre>
     </div>
   </div>
@@ -175,6 +170,7 @@
     import createModule from './qpdf.js';
 
     let qpdf = null;
+
     const input = document.getElementById('pdfInput');
     const processBtn = document.getElementById('processBtn');
     const loading = document.getElementById('loading');
@@ -184,74 +180,72 @@
     const errorBox = document.getElementById('errorBox');
     const errorMessage = document.getElementById('errorMessage');
 
+    function resetUI() {
+      loading.style.display = 'none';
+      resultDiv.style.display = 'none';
+      errorBox.style.display = 'none';
+      progressBar.style.width = '0%';
+    }
+
+    function showError(err) {
+      const msg = (err && err.stack) ? err.stack : (err?.message || String(err));
+      errorMessage.textContent = msg;
+      errorBox.style.display = 'block';
+      console.error('🔴 처리 중 오류 발생:', err);
+      resetUI();
+    }
+
     async function initializeQpdf() {
       try {
         qpdf = await createModule({
-          locateFile: (path) => {
-            if (path.endsWith('.wasm')) {
-              return './qpdf.wasm';
-            }
-            return path;
-          }
+          locateFile: (path) => path.endsWith('.wasm') ? './qpdf.wasm' : path,
         });
         processBtn.disabled = false;
-      } catch (e) {
-        showError(`qpdf 초기화 실패: ${e.message || e}`);
+        console.log('✅ QPDF 모듈 초기화 완료');
+      } catch (err) {
+        showError("QPDF 모듈 초기화 실패: " + err);
       }
     }
 
-    function showError(msg) {
-      errorMessage.textContent = msg;
-      errorBox.style.display = 'block';
-      loading.style.display = 'none';
-      resultDiv.style.display = 'none';
-      processBtn.disabled = false;
-      progressBar.style.width = '0%';
-      console.error(msg);
-    }
-
     input.addEventListener('change', () => {
-      errorBox.style.display = 'none';
-      resultDiv.style.display = 'none';
+      resetUI();
       processBtn.disabled = input.files.length === 0;
     });
 
     processBtn.addEventListener('click', async () => {
       if (!input.files[0]) return;
 
-      processBtn.disabled = true;
+      resetUI();
       loading.style.display = 'block';
-      errorBox.style.display = 'none';
-      resultDiv.style.display = 'none';
       progressBar.style.width = '10%';
+      processBtn.disabled = true;
 
       try {
-        const arrayBuffer = await input.files[0].arrayBuffer();
-        const uint8Array = new Uint8Array(arrayBuffer);
+        const file = input.files[0];
+        const data = new Uint8Array(await file.arrayBuffer());
 
-        qpdf.FS.writeFile('/input.pdf', uint8Array);
+        qpdf.FS.writeFile('/input.pdf', data);
         progressBar.style.width = '40%';
 
         qpdf.callMain(['--decrypt', '/input.pdf', '--', '/output.pdf']);
-        progressBar.style.width = '80%';
+        progressBar.style.width = '70%';
 
-        const data = qpdf.FS.readFile('/output.pdf');
+        const result = qpdf.FS.readFile('/output.pdf');
         progressBar.style.width = '90%';
 
-        const blob = new Blob([data], { type: 'application/pdf' });
+        const blob = new Blob([result], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
 
         downloadLink.href = url;
-        downloadLink.download = input.files[0].name.replace(/\.pdf$/i, '') + '-unlocked.pdf';
+        downloadLink.download = file.name.replace(/\.pdf$/i, '') + '-unlocked.pdf';
 
-        progressBar.style.width = '100%';
-        loading.style.display = 'none';
         resultDiv.style.display = 'block';
-      } catch (e) {
-        showError(e.message || e.toString());
+        progressBar.style.width = '100%';
+      } catch (err) {
+        showError(err);
       } finally {
+        loading.style.display = 'none';
         processBtn.disabled = false;
-        progressBar.style.width = '0%';
       }
     });
 
