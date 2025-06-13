@@ -2,129 +2,307 @@
 <html lang="ko" class="dark">
 <head>
   <meta charset="UTF-8" />
-  <title>🔓 PDF 권한 제거기</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script>
-    // Safari 대응: 전역에서 QPDF 초기화 준비
-    let qpdfModule = null;
-    function loadQPDF() {
-      return new Promise((resolve, reject) => {
-        if (window.qpdf) {
-          window.qpdf({
-            locateFile(path) {
-              if (path.endsWith('.wasm')) return './qpdf.wasm';
-              return path;
-            },
-          }).then((instance) => {
-            qpdfModule = instance;
-            resolve();
-          }).catch(reject);
-        } else {
-          reject(new Error("qpdf.js가 로드되지 않았습니다."));
-        }
-      });
-    }
-  </script>
+  <title>🔓 PDF 권한 제거기 (QPDF WASM)</title>
   <style>
-    /* 앞서 드린 스타일과 동일하므로 생략 가능 */
+    /* 다크모드 및 기본 스타일 */
+    :root {
+      --bg-light: #f9fafb;
+      --bg-dark: #1f2937;
+      --text-light: #1f2937;
+      --text-dark: #f9fafb;
+      --primary: #2563eb;
+      --primary-dark: #1e40af;
+      --success: #16a34a;
+      --error: #dc2626;
+    }
+    html.dark {
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
+    }
+    body {
+      background-color: var(--bg-light);
+      color: var(--text-light);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    html.dark body {
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
+    }
+    .container {
+      background: var(--bg-light);
+      color: var(--text-light);
+      max-width: 480px;
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      padding: 2rem;
+      box-sizing: border-box;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    html.dark .container {
+      background: #374151; /* slate-700 */
+      color: var(--text-dark);
+    }
+    h1 {
+      margin-top: 0;
+      font-weight: 700;
+      font-size: 1.75rem;
+      margin-bottom: 1rem;
+      user-select: none;
+    }
+    p.description {
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      color: #4b5563; /* slate-600 */
+    }
+    html.dark p.description {
+      color: #d1d5db; /* slate-300 */
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      user-select: none;
+    }
+    input[type="file"] {
+      width: 100%;
+      padding: 0.5rem;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1.5px solid #d1d5db; /* slate-300 */
+      cursor: pointer;
+      color: #374151; /* slate-700 */
+      transition: border-color 0.3s;
+      background-color: white;
+    }
+    html.dark input[type="file"] {
+      background-color: #4b5563; /* slate-600 */
+      border-color: #6b7280; /* slate-500 */
+      color: #e5e7eb; /* slate-200 */
+    }
+    input[type="file"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.4);
+    }
+    button {
+      margin-top: 1.25rem;
+      width: 100%;
+      padding: 0.75rem 0;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border-radius: 10px;
+      border: none;
+      background-color: var(--primary);
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      user-select: none;
+    }
+    button:disabled {
+      background-color: #9ca3af; /* gray-400 */
+      cursor: not-allowed;
+    }
+    button:hover:not(:disabled) {
+      background-color: var(--primary-dark);
+    }
+    #loading {
+      margin-top: 1rem;
+      text-align: center;
+      display: none;
+    }
+    .spinner {
+      margin: 0 auto;
+      border: 4px solid #e5e7eb;
+      border-top: 4px solid var(--primary);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    #progressContainer {
+      width: 100%;
+      background-color: #d1d5db; /* slate-300 */
+      border-radius: 8px;
+      overflow: hidden;
+      height: 12px;
+      margin-top: 1rem;
+    }
+    html.dark #progressContainer {
+      background-color: #6b7280; /* slate-500 */
+    }
+    #progressBar {
+      height: 100%;
+      background-color: var(--primary);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    #result {
+      margin-top: 1.5rem;
+      display: none;
+      text-align: center;
+    }
+    #result a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      user-select: none;
+    }
+    #result a:hover {
+      text-decoration: underline;
+    }
+    #errorBox {
+      margin-top: 1rem;
+      color: var(--error);
+      font-weight: 600;
+      display: none;
+      user-select: text;
+      white-space: pre-wrap;
+      background: #fee2e2;
+      border-radius: 8px;
+      padding: 1rem;
+      font-size: 0.9rem;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+    html.dark #errorBox {
+      background: #7f1d1d;
+      color: #fca5a5;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="container" role="main" aria-label="PDF 권한 제거기">
     <h1>🔓 PDF 권한 제거기</h1>
-    <p class="description">PDF의 암호/권한을 제거하고 새로 저장합니다.</p>
+    <p class="description">비밀번호가 걸린 PDF에서 권한을 제거해 다운로드하세요. 모든 처리는 브라우저 내에서 이루어집니다.</p>
+    
     <label for="pdfInput">PDF 파일 선택</label>
-    <input type="file" id="pdfInput" accept="application/pdf" />
+    <input type="file" id="pdfInput" accept="application/pdf" aria-describedby="fileHelp" />
+    
     <button id="processBtn" disabled>권한 제거 실행</button>
 
-    <div id="loading" style="display:none;">
-      <div class="spinner"></div>
+    <div id="loading" aria-live="polite" aria-busy="true" role="status">
+      <div class="spinner" aria-hidden="true"></div>
       <div>처리 중입니다...</div>
-      <div id="progressContainer"><div id="progressBar"></div></div>
+      <div id="progressContainer" aria-hidden="true">
+        <div id="progressBar"></div>
+      </div>
     </div>
 
-    <div id="result" style="display:none;">
-      <p>✅ 완료!</p>
-      <a id="downloadLink" download>📥 다운로드</a>
+    <div id="result" role="region" aria-live="polite">
+      <p>✅ 처리 완료!</p>
+      <a id="downloadLink" href="#" download>📥 다운로드 링크</a>
     </div>
 
-    <div id="errorBox" style="display:none;">
-      <strong>⚠ 오류:</strong>
+    <div id="errorBox" role="alert" aria-live="assertive">
+      <strong>⚠ 오류 메시지:</strong>
       <pre id="errorMessage"></pre>
     </div>
   </div>
 
-  <!-- ✅ qpdf.js 직접 삽입 -->
-  <script src="./qpdf.js"></script>
+  <script type="module">
+    let qpdf = null;
 
-  <script>
     const input = document.getElementById('pdfInput');
-    const btn = document.getElementById('processBtn');
+    const processBtn = document.getElementById('processBtn');
     const loading = document.getElementById('loading');
-    const progress = document.getElementById('progressBar');
-    const result = document.getElementById('result');
-    const download = document.getElementById('downloadLink');
+    const progressBar = document.getElementById('progressBar');
+    const resultDiv = document.getElementById('result');
+    const downloadLink = document.getElementById('downloadLink');
     const errorBox = document.getElementById('errorBox');
-    const errorMsg = document.getElementById('errorMessage');
+    const errorMessage = document.getElementById('errorMessage');
 
-    async function init() {
+    // qpdf 초기화 함수
+    async function initializeQpdf() {
       try {
-        await loadQPDF();
-        btn.disabled = false;
+        // qpdf.js 동적 import
+        const module = await import('./qpdf.js');
+        qpdf = await module.default({
+          locateFile(path) {
+            if (path.endsWith('.wasm')) return './qpdf.wasm';
+            return path;
+          },
+        });
+        processBtn.disabled = false;
       } catch (e) {
-        showError("qpdf 초기화 실패: " + e.message);
+        showError(`qpdf 초기화 실패: ${e.message || e}`);
       }
     }
 
+    // 에러 출력 함수
     function showError(msg) {
-      errorMsg.textContent = msg;
+      errorMessage.textContent = msg;
       errorBox.style.display = 'block';
       loading.style.display = 'none';
-      result.style.display = 'none';
-      btn.disabled = false;
+      resultDiv.style.display = 'none';
+      processBtn.disabled = false;
+      progressBar.style.width = '0%';
+      console.error(msg);
     }
 
-    btn.addEventListener('click', async () => {
-      if (!input.files[0]) return;
-      btn.disabled = true;
+    input.addEventListener('change', () => {
       errorBox.style.display = 'none';
-      result.style.display = 'none';
+      resultDiv.style.display = 'none';
+      processBtn.disabled = input.files.length === 0;
+    });
+
+    processBtn.addEventListener('click', async () => {
+      if (!input.files[0]) return;
+
+      processBtn.disabled = true;
       loading.style.display = 'block';
-      progress.style.width = '20%';
+      errorBox.style.display = 'none';
+      resultDiv.style.display = 'none';
+      progressBar.style.width = '10%';
 
       try {
         const arrayBuffer = await input.files[0].arrayBuffer();
         const uint8Array = new Uint8Array(arrayBuffer);
-        qpdfModule.FS.writeFile('/in.pdf', uint8Array);
-        progress.style.width = '40%';
 
-        qpdfModule.callMain(['--decrypt', '/in.pdf', '/out.pdf']);
-        progress.style.width = '80%';
+        // FS에 입력파일 쓰기
+        qpdf.FS.writeFile('/input.pdf', uint8Array);
+        progressBar.style.width = '40%';
 
-        const out = qpdfModule.FS.readFile('/out.pdf');
-        const blob = new Blob([out], { type: 'application/pdf' });
+        // 권한 제거 수행 (암호 해제)
+        qpdf.callMain(['--decrypt', '/input.pdf', '/output.pdf']);
+        progressBar.style.width = '80%';
+
+        // 결과 읽기
+        const data = qpdf.FS.readFile('/output.pdf');
+        progressBar.style.width = '90%';
+
+        // Blob 생성 및 URL 생성
+        const blob = new Blob([data], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
-        download.href = url;
-        download.download = input.files[0].name.replace(/\.pdf$/i, '') + '-unlocked.pdf';
 
+        downloadLink.href = url;
+        downloadLink.download = input.files[0].name.replace(/\.pdf$/i, '') + '-unlocked.pdf';
+
+        progressBar.style.width = '100%';
         loading.style.display = 'none';
-        result.style.display = 'block';
-        progress.style.width = '100%';
+        resultDiv.style.display = 'block';
       } catch (e) {
-        showError("처리 오류: " + (e.message || e));
+        showError(e.message || e.toString());
       } finally {
-        btn.disabled = false;
-        progress.style.width = '0%';
+        processBtn.disabled = false;
+        progressBar.style.width = '0%';
       }
     });
 
-    input.addEventListener('change', () => {
-      errorBox.style.display = 'none';
-      result.style.display = 'none';
-      btn.disabled = input.files.length === 0 || !qpdfModule;
-    });
-
-    init();
+    // 초기화 시작
+    initializeQpdf();
   </script>
 </body>
 </html>
