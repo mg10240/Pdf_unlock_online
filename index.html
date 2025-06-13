@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>🔓 PDF 권한 제거기 (QPDF WASM)</title>
   <style>
-    /* 기존 스타일 유지 */
+    /* 다크모드 및 기본 스타일 */
     :root {
       --bg-light: #f9fafb;
       --bg-dark: #1f2937;
@@ -49,7 +49,7 @@
       transition: background-color 0.3s, color 0.3s;
     }
     html.dark .container {
-      background: #374151;
+      background: #374151; /* slate-700 */
       color: var(--text-dark);
     }
     h1 {
@@ -62,10 +62,10 @@
     p.description {
       margin-top: 0;
       margin-bottom: 1.5rem;
-      color: #4b5563;
+      color: #4b5563; /* slate-600 */
     }
     html.dark p.description {
-      color: #d1d5db;
+      color: #d1d5db; /* slate-300 */
     }
     label {
       display: block;
@@ -78,16 +78,16 @@
       padding: 0.5rem;
       font-size: 1rem;
       border-radius: 6px;
-      border: 1.5px solid #d1d5db;
+      border: 1.5px solid #d1d5db; /* slate-300 */
       cursor: pointer;
-      color: #374151;
+      color: #374151; /* slate-700 */
       transition: border-color 0.3s;
       background-color: white;
     }
     html.dark input[type="file"] {
-      background-color: #4b5563;
-      border-color: #6b7280;
-      color: #e5e7eb;
+      background-color: #4b5563; /* slate-600 */
+      border-color: #6b7280; /* slate-500 */
+      color: #e5e7eb; /* slate-200 */
     }
     input[type="file"]:focus {
       outline: none;
@@ -109,7 +109,7 @@
       user-select: none;
     }
     button:disabled {
-      background-color: #9ca3af;
+      background-color: #9ca3af; /* gray-400 */
       cursor: not-allowed;
     }
     button:hover:not(:disabled) {
@@ -134,14 +134,14 @@
     }
     #progressContainer {
       width: 100%;
-      background-color: #d1d5db;
+      background-color: #d1d5db; /* slate-300 */
       border-radius: 8px;
       overflow: hidden;
       height: 12px;
       margin-top: 1rem;
     }
     html.dark #progressContainer {
-      background-color: #6b7280;
+      background-color: #6b7280; /* slate-500 */
     }
     #progressBar {
       height: 100%;
@@ -213,9 +213,7 @@
   </div>
 
   <script type="module">
-    import createQPDF from './qpdf.js';
-
-    let qpdf = null;
+    import { QPDF } from "./qpdf.js";
 
     const input = document.getElementById('pdfInput');
     const processBtn = document.getElementById('processBtn');
@@ -226,13 +224,12 @@
     const errorBox = document.getElementById('errorBox');
     const errorMessage = document.getElementById('errorMessage');
 
+    let qpdf = null;
+
     async function initializeQpdf() {
       try {
-        loading.style.display = 'block';
-        progressBar.style.width = '0%';
-        qpdf = await createQPDF();
+        qpdf = await QPDF();
         processBtn.disabled = false;
-        loading.style.display = 'none';
       } catch (e) {
         showError(`qpdf 초기화 실패: ${e.message || e}`);
       }
@@ -267,20 +264,15 @@
         const arrayBuffer = await input.files[0].arrayBuffer();
         const uint8Array = new Uint8Array(arrayBuffer);
 
-        // 입력 파일 쓰기
         qpdf.FS.writeFile('/input.pdf', uint8Array);
         progressBar.style.width = '40%';
 
-        // 권한 제거 실행
-        // run() 함수는 비동기이므로 await 필요
-        await qpdf.run(['--decrypt', '/input.pdf', '/output.pdf']);
+        qpdf.callMain(['--decrypt', '/input.pdf', '/output.pdf']);
         progressBar.style.width = '80%';
 
-        // 결과 읽기
         const data = qpdf.FS.readFile('/output.pdf');
         progressBar.style.width = '90%';
 
-        // Blob 및 URL 생성
         const blob = new Blob([data], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
 
@@ -298,7 +290,6 @@
       }
     });
 
-    // 초기화 호출
     initializeQpdf();
   </script>
 </body>
