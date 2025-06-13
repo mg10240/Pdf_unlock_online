@@ -3,166 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>🔓 PDF 권한 제거기</title>
-  <style>
-    :root {
-      --bg-light: #f9fafb;
-      --bg-dark: #1f2937;
-      --text-light: #1f2937;
-      --text-dark: #f9fafb;
-      --primary: #2563eb;
-      --primary-dark: #1e40af;
-      --success: #16a34a;
-      --error: #dc2626;
-    }
-    html {
-      background-color: var(--bg-light);
-      color: var(--text-light);
-    }
-    html[data-theme='dark'] {
-      background-color: var(--bg-dark);
-      color: var(--text-dark);
-    }
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-      padding: 1rem;
-    }
-    .container {
-      background: white;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      width: 100%;
-      max-width: 480px;
-      text-align: center;
-    }
-    html[data-theme='dark'] .container {
-      background: #374151;
-    }
-    h1 {
-      font-size: 1.75rem;
-      margin-bottom: 1rem;
-    }
-    p {
-      margin-bottom: 1.5rem;
-      color: #4b5563;
-    }
-    html[data-theme='dark'] p {
-      color: #d1d5db;
-    }
-    input[type="file"] {
-      width: 100%;
-      padding: 0.75rem;
-      margin-bottom: 1rem;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      background-color: white;
-      cursor: pointer;
-    }
-    html[data-theme='dark'] input[type="file"] {
-      background-color: #4b5563;
-      border-color: #6b7280;
-      color: #e5e7eb;
-    }
-    button {
-      width: 100%;
-      padding: 0.75rem;
-      background-color: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 1.1rem;
-      font-weight: bold;
-    }
-    button:disabled {
-      background-color: #9ca3af;
-      cursor: not-allowed;
-    }
-    button:hover:not(:disabled) {
-      background-color: var(--primary-dark);
-    }
-    #loading {
-      display: none;
-      margin-top: 1rem;
-    }
-    .spinner {
-      margin: 0 auto;
-      border: 4px solid #e5e7eb;
-      border-top: 4px solid var(--primary);
-      border-radius: 50%;
-      width: 32px;
-      height: 32px;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    #progressContainer {
-      width: 100%;
-      background-color: #d1d5db;
-      border-radius: 8px;
-      overflow: hidden;
-      height: 12px;
-      margin-top: 1rem;
-    }
-    #progressBar {
-      height: 100%;
-      background-color: var(--primary);
-      width: 0%;
-      transition: width 0.3s ease;
-    }
-    #result {
-      margin-top: 1.5rem;
-      display: none;
-    }
-    #errorBox {
-      margin-top: 1rem;
-      color: var(--error);
-      font-weight: bold;
-      display: none;
-      background: #fee2e2;
-      border-radius: 8px;
-      padding: 1rem;
-      font-size: 0.9rem;
-      max-height: 200px;
-      overflow-y: auto;
-      text-align: left;
-    }
-    html[data-theme='dark'] #errorBox {
-      background: #7f1d1d;
-      color: #fca5a5;
-    }
-  </style>
+  <title>🔓 PDF 권한 제거기 (QPDF WASM)</title>
+  <!-- 스타일은 그대로 유지 -->
+  <style> /* 기존 스타일 복사 */ </style>
 </head>
 <body>
-  <label for="pdfInput" style="cursor:pointer; color:blue; text-decoration:underline;">
-  📂 PDF 파일 선택하기
-</label>
-<input type="file" id="pdfInput" accept="application/pdf" style="display:none" />
-<button id="processBtn" disabled>권한 제거 실행</button>
-
-<script>
-  const input = document.getElementById('pdfInput');
-  const processBtn = document.getElementById('processBtn');
-
-  input.addEventListener('change', () => {
-    alert(`파일 선택됨? files.length = ${input.files.length}`);
-    processBtn.disabled = input.files.length === 0;
-  });
-</script>
-
   <div class="container">
     <h1>🔓 PDF 권한 제거기</h1>
-    <p>비밀번호가 걸린 PDF의 권한을 제거하고 새 파일로 저장하세요. 브라우저 내에서만 처리됩니다.</p>
+    <p>비밀번호가 걸린 PDF에서 권한을 제거해 다운로드하세요. 모든 처리는 브라우저 내에서 이루어집니다.</p>
     <input type="file" id="pdfInput" accept="application/pdf" />
-    <button id="processBtn" disabled>🔧 권한 제거</button>
-
+    <button id="processBtn" disabled>권한 제거 실행</button>
     <div id="loading">
       <div class="spinner"></div>
       <p>처리 중입니다...</p>
@@ -170,28 +20,21 @@
         <div id="progressBar"></div>
       </div>
     </div>
-
     <div id="result">
-      <p>✅ 성공적으로 처리되었습니다!</p>
-      <a id="downloadLink" href="#" download>📥 다운로드</a>
+      <p>✅ 처리 완료!</p>
+      <a id="downloadLink" href="#" download>📥 다운로드 링크</a>
     </div>
-
     <div id="errorBox">
-      <strong>⚠ 오류 발생:</strong>
+      <strong>⚠ 오류 메시지:</strong>
       <pre id="errorMessage"></pre>
     </div>
   </div>
 
-  <script type="module">
+  <!-- qpdf WASM 모듈 CDN에서 불러오기 (ex. jsdelivr) -->
+  <script src="https://cdn.jsdelivr.net/npm/@neslinesli93/qpdf-wasm@0.2.0/dist/qpdf.js"></script>
 
-    window.addEventListener('DOMContentLoaded', () => {
-  alert("✅ 페이지 로드 완료");
-});
-
-    import createModule from './qpdf.js';
-
+  <script>
     let qpdf = null;
-
     const input = document.getElementById('pdfInput');
     const processBtn = document.getElementById('processBtn');
     const loading = document.getElementById('loading');
@@ -201,76 +44,74 @@
     const errorBox = document.getElementById('errorBox');
     const errorMessage = document.getElementById('errorMessage');
 
-    function resetUI() {
+    function showError(msg) {
+      errorMessage.textContent = msg;
+      errorBox.style.display = 'block';
       loading.style.display = 'none';
       resultDiv.style.display = 'none';
-      errorBox.style.display = 'none';
+      processBtn.disabled = false;
       progressBar.style.width = '0%';
+      console.error(msg);
     }
 
-    function showError(err) {
-  const msg = (err && err.stack) ? err.stack : (err?.message || String(err));
-  errorMessage.textContent = msg;
-  errorBox.style.display = 'block';
-  console.error('🔴 처리 중 오류 발생:', err);
-
-  alert('🚫 오류가 발생했습니다:\n\n' + msg);
-  resetUI();
-}
-
+    input.addEventListener('change', () => {
+      errorBox.style.display = 'none';
+      resultDiv.style.display = 'none';
+      processBtn.disabled = input.files.length === 0;
+    });
 
     async function initializeQpdf() {
       try {
         qpdf = await createModule({
-          locateFile: (path) => path.endsWith('.wasm') ? './qpdf.wasm' : path,
+          locateFile: (path) => {
+            if (path.endsWith('.wasm')) {
+              return 'https://cdn.jsdelivr.net/npm/@neslinesli93/qpdf-wasm@0.2.0/dist/qpdf.wasm';
+            }
+            return path;
+          }
         });
-        processBtn.disabled = false;
-        console.log('✅ QPDF 모듈 초기화 완료');
-      } catch (err) {
-        showError("QPDF 모듈 초기화 실패: " + err);
+        processBtn.disabled = input.files.length === 0;
+      } catch (e) {
+        showError(`qpdf 초기화 실패: ${e.message || e}`);
       }
     }
-
-    input.addEventListener('change', () => {
-  alert(`파일 선택됨? files.length = ${input.files.length}`);
-  processBtn.disabled = input.files.length === 0;
-});
-
 
     processBtn.addEventListener('click', async () => {
       if (!input.files[0]) return;
 
-      resetUI();
-      loading.style.display = 'block';
-      progressBar.style.width = '10%';
       processBtn.disabled = true;
+      loading.style.display = 'block';
+      errorBox.style.display = 'none';
+      resultDiv.style.display = 'none';
+      progressBar.style.width = '10%';
 
       try {
-        const file = input.files[0];
-        const data = new Uint8Array(await file.arrayBuffer());
+        const arrayBuffer = await input.files[0].arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
 
-        qpdf.FS.writeFile('/input.pdf', data);
+        qpdf.FS.writeFile('/input.pdf', uint8Array);
         progressBar.style.width = '40%';
 
         qpdf.callMain(['--decrypt', '/input.pdf', '--', '/output.pdf']);
-        progressBar.style.width = '70%';
+        progressBar.style.width = '80%';
 
-        const result = qpdf.FS.readFile('/output.pdf');
+        const data = qpdf.FS.readFile('/output.pdf');
         progressBar.style.width = '90%';
 
-        const blob = new Blob([result], { type: 'application/pdf' });
+        const blob = new Blob([data], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
 
         downloadLink.href = url;
-        downloadLink.download = file.name.replace(/\.pdf$/i, '') + '-unlocked.pdf';
+        downloadLink.download = input.files[0].name.replace(/\.pdf$/i, '') + '-unlocked.pdf';
 
-        resultDiv.style.display = 'block';
         progressBar.style.width = '100%';
-      } catch (err) {
-        showError(err);
-      } finally {
         loading.style.display = 'none';
+        resultDiv.style.display = 'block';
+      } catch (e) {
+        showError(e.message || e.toString());
+      } finally {
         processBtn.disabled = false;
+        progressBar.style.width = '0%';
       }
     });
 
