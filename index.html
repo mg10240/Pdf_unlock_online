@@ -229,12 +229,7 @@
       try {
         // qpdf.js 동적 import
         const module = await import('./qpdf.js');
-        qpdf = await module({
-          locateFile(path) {
-            if (path.endsWith('.wasm')) return './qpdf.wasm';
-            return path;
-          },
-        });
+        qpdf = module;
         processBtn.disabled = false;
       } catch (e) {
         showError(`qpdf 초기화 실패: ${e.message || e}`);
