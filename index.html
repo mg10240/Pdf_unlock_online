@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF 권한 제거기</title>
+  <script type="module">
+    import createModule from './qpdf.js';
+    window.qpdfReady = createModule({
+      locateFile: () => './qpdf.wasm',
+    });
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+    };
+  </script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen flex items-center justify-center p-6">
+  <div class="max-w-xl w-full bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
+    <h1 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">🔓 PDF 권한 제거기</h1>
+    <p class="text-gray-600 dark:text-gray-300 mb-6">비밀번호가 걸린 PDF에서 권한을 제거해 다운로드하세요. 모든 처리는 브라우저 내에서 이루어집니다.</p>
+
+    <label class="block mb-4">
+      <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">PDF 파일 선택</span>
+      <input id="pdfInput" type="file" accept="application/pdf" class="file:px-4 file:py-2 file:border file:rounded-md file:border-gray-300 file:text-sm file:bg-white file:text-gray-700 dark:file:bg-gray-700 dark:file:text-gray-100" />
+    </label>
+
+    <button id="processBtn" class="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-xl hover:bg-blue-700 transition disabled:opacity-50">권한 제거 실행</button>
+
+    <div id="loading" class="mt-4 hidden text-center">
+      <svg class="animate-spin h-6 w-6 mx-auto text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+      </svg>
+      <p class="mt-2 text-sm">처리 중입니다...</p>
+      <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mt-4">
+        <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-in-out" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <div id="result" class="mt-6 hidden">
+      <p class="text-green-600 dark:text-green-400 font-medium mb-2">✅ 처리 완료!</p>
+      <a id="downloadLink" class="text-blue-600 dark:text-blue-400 hover:underline" download>📥 다운로드 링크</a>
+    </div>
+  </div>
+
+  <script type="module">
+    const qpdf = await window.qpdfReady;
+
+    const input = document.getElementById("pdfInput");
+    const processBtn = document.getElementById("processBtn");
+    const loading = document.getElementById("loading");
+    const progressBar = document.getElementById("progressBar");
+    const resultDiv = document.getElementById("result");
+    const downloadLink = document.getElementById("downloadLink");
+
+    processBtn.onclick = async () => {
+      const file = input.files[0];
+      if (!file) return alert("PDF 파일을 선택해주세요.");
+
+      processBtn.disabled = true;
+      loading.classList.remove("hidden");
+      resultDiv.classList.add("hidden");
+      progressBar.style.width = "10%";
+
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+
+        const inputPath = "/input.pdf";
+        const outputPath = "/output.pdf";
+
+        qpdf.FS.writeFile(inputPath, uint8Array);
+        progressBar.style.width = "40%";
+
+        qpdf.callMain(["--decrypt", inputPath, outputPath]);
+        progressBar.style.width = "80%";
+
+        const result = qpdf.FS.readFile(outputPath);
+        const blob = new Blob([result], { type: "application/pdf" });
+        const url = URL.createObjectURL(blob);
+
+        downloadLink.href = url;
+        downloadLink.download = "decrypted.pdf";
+        resultDiv.classList.remove("hidden");
+        progressBar.style.width = "100%";
+      } catch (err) {
+        alert("QPDF 처리 중 오류가 발생했습니다. 콘솔 확인");
+        console.error(err);
+      } finally {
+        loading.classList.add("hidden");
+        processBtn.disabled = false;
+      }
+    };
+  </script>
+</body>
+</html>
