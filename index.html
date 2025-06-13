@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>🔓 PDF 권한 제거기 (QPDF WASM)</title>
   <style>
-    /* 다크모드 및 기본 스타일 */
     :root {
       --bg-light: #f9fafb;
       --bg-dark: #1f2937;
@@ -173,7 +172,7 @@
   </div>
 
   <script type="module">
-    import createModule from 'https://cdn.jsdelivr.net/npm/@neslinesli93/qpdf-wasm@0.2.0/dist/qpdf.mjs';
+    import createModule from './qpdf.js';
 
     let qpdf = null;
     const input = document.getElementById('pdfInput');
@@ -188,7 +187,12 @@
     async function initializeQpdf() {
       try {
         qpdf = await createModule({
-          locateFile: () => 'https://cdn.jsdelivr.net/npm/@neslinesli93/qpdf-wasm@0.2.0/dist/qpdf.wasm',
+          locateFile: (path) => {
+            if (path.endsWith('.wasm')) {
+              return './qpdf.wasm';
+            }
+            return path;
+          }
         });
         processBtn.disabled = false;
       } catch (e) {
