@@ -31,9 +31,10 @@
   </div>
 
   <!-- qpdf WASM 모듈 CDN에서 불러오기 (ex. jsdelivr) -->
-  <script src="https://cdn.jsdelivr.net/npm/@neslinesli93/qpdf-wasm@0.2.0/dist/qpdf.js"></script>
+  <script type="module">
+import createModule from 'https://cdn.jsdelivr.net/npm/@neslinesli93/qpdf-wasm@0.2.0/dist/qpdf.js';
 
-  <script>
+
     let qpdf = null;
     const input = document.getElementById('pdfInput');
     const processBtn = document.getElementById('processBtn');
