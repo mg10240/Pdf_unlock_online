@@ -44,6 +44,18 @@
       <p class="text-green-600 dark:text-green-400 font-medium mb-2">✅ 처리 완료!</p>
       <a id="downloadLink" class="text-blue-600 dark:text-blue-400 hover:underline" download>📥 다운로드 링크</a>
     </div>
+
+    <!-- 오류 박스 -->
+    <div id="errorBox" class="mt-6 hidden bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 rounded-lg p-4 text-red-900 dark:text-red-300">
+      <h2 class="text-lg font-semibold mb-2">⚠ 오류가 발생했습니다</h2>
+      <pre id="errorMessage" class="whitespace-pre-wrap mb-3 max-h-48 overflow-auto"></pre>
+      <div class="flex gap-3">
+        <button id="copyErrorBtn" class="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded transition">📋 오류 복사</button>
+        <a id="issueLink" href="#" target="_blank" class="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded transition flex items-center gap-1">
+          🐞 GitHub 이슈 등록
+        </a>
+      </div>
+    </div>
   </div>
 
   <script type="module">
@@ -56,13 +68,37 @@
     const resultDiv = document.getElementById("result");
     const downloadLink = document.getElementById("downloadLink");
 
+    const errorBox = document.getElementById("errorBox");
+    const errorMessage = document.getElementById("errorMessage");
+    const copyErrorBtn = document.getElementById("copyErrorBtn");
+    const issueLink = document.getElementById("issueLink");
+
+    function showError(err) {
+      const message = `[오류 메시지]\n${err.toString()}\n\n[브라우저 정보]\n${navigator.userAgent}`;
+      errorMessage.textContent = message;
+      errorBox.classList.remove("hidden");
+      // GitHub issue 링크 생성
+      const title = encodeURIComponent("[Bug] PDF 처리 중 오류 발생");
+      const body = encodeURIComponent(message);
+      const repo = "mg10240/Pdf_unlock_online"; // ← 여길 본인 깃허브 repo로 바꾸세요
+      issueLink.href = `https://github.com/${repo}/issues/new?title=${title}&body=${body}`;
+    }
+
+    copyErrorBtn.onclick = () => {
+      navigator.clipboard.writeText(errorMessage.textContent).then(() => {
+        alert("오류 메시지가 클립보드에 복사되었습니다!");
+      });
+    };
+
     processBtn.onclick = async () => {
       const file = input.files[0];
       if (!file) return alert("PDF 파일을 선택해주세요.");
 
+      // 초기화
+      errorBox.classList.add("hidden");
+      resultDiv.classList.add("hidden");
       processBtn.disabled = true;
       loading.classList.remove("hidden");
-      resultDiv.classList.add("hidden");
       progressBar.style.width = "10%";
 
       try {
@@ -87,8 +123,7 @@
         resultDiv.classList.remove("hidden");
         progressBar.style.width = "100%";
       } catch (err) {
-        alert("QPDF 처리 중 오류가 발생했습니다. 콘솔 확인");
-        console.error(err);
+        showError(err);
       } finally {
         loading.classList.add("hidden");
         processBtn.disabled = false;
