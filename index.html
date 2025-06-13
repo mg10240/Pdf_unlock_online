@@ -229,7 +229,7 @@
       try {
         // qpdf.js 동적 import
         const module = await import('./qpdf.js');
-        qpdf = await module.default({
+        qpdf = await module({
           locateFile(path) {
             if (path.endsWith('.wasm')) return './qpdf.wasm';
             return path;
