@@ -141,9 +141,6 @@
   </style>
 </head>
 <body>
-   <script>
-    alert("JS 실행 확인");
-  </script>
   <div class="container">
     <h1>🔓 PDF 권한 제거기</h1>
     <p>비밀번호가 걸린 PDF의 권한을 제거하고 새 파일로 저장하세요. 브라우저 내에서만 처리됩니다.</p>
@@ -219,9 +216,10 @@
     }
 
     input.addEventListener('change', () => {
-      resetUI();
-      processBtn.disabled = input.files.length === 0;
-    });
+  alert(`파일 선택됨? files.length = ${input.files.length}`);
+  processBtn.disabled = input.files.length === 0;
+});
+
 
     processBtn.addEventListener('click', async () => {
       if (!input.files[0]) return;
