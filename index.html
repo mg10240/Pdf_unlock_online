@@ -167,6 +167,11 @@
   </div>
 
   <script type="module">
+
+    window.addEventListener('DOMContentLoaded', () => {
+  alert("✅ 페이지 로드 완료");
+});
+
     import createModule from './qpdf.js';
 
     let qpdf = null;
