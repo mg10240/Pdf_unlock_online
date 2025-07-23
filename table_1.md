@@ -38,24 +38,24 @@
     <tr>
       <td style="background-color: #333; color: #fff;">1 교 시</td>
       <td>8:30~10:10</td>
-      <td>국 어</td>
-      <td>국 어</td>
-      <td>국 어</td>
-      <td>국 어</td>
-      <td>국 어</td>
-      <td>국 어</td>
-      <td>국 어</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
     </tr>
     <tr>
       <td style="background-color: #333; color: #fff;">2 교 시</td>
       <td>10:30~12:10</td>
-      <td>수 학</td>
-      <td>수 학</td>
-      <td>수 학</td>
-      <td>수 학</td>
-      <td>수 학</td>
-      <td>수 학</td>
-      <td>수 학</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
     </tr>
     <tr>
       <td style="background-color: #333; color: #fff;">점 심 식 사</td>
@@ -65,24 +65,24 @@
     <tr>
       <td style="background-color: #333; color: #fff;">3 교 시</td>
       <td>13:20~15:00</td>
-      <td>영 어</td>
-      <td>영 어</td>
-      <td>영 어</td>
-      <td>영 어</td>
-      <td>영 어</td>
-      <td>영 어</td>
-      <td>영 어</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
     </tr>
     <tr>
       <td style="background-color: #333; color: #fff;">4 교 시</td>
       <td>15:20~17:00</td>
-      <td>수 학</td>
-      <td>수 학</td>
-      <td>수 학</td>
-      <td>수 학</td>
-      <td>수 학</td>
-      <td>수 학</td>
-      <td>수 학</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
     </tr>
     <tr>
       <td style="background-color: #333; color: #fff;">4.5 교 시</td>
