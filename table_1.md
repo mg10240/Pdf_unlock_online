@@ -58,7 +58,7 @@
       <td>수 학</td>
     </tr>
     <tr>
-      <td style="background-color: #333; color: #fff;">점심식사</td>
+      <td style="background-color: #333; color: #fff;">점 심 식 사</td>
       <td>12:10~13:20</td>
       <td colspan="7">점 심 식 사</td>
     </tr>
