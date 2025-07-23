@@ -6,38 +6,25 @@
 </colgroup>
 <tbody>
 <tr class="odd">
-<td></td>
-<td></td>
-<td>% ˍ ㅎ . ㄴ</td>
+<td>교 시</td>
+<td>시 간</td>
+<td>월 요 일</td>
 </tr>
 <tr class="even">
 <td>0 교 시</td>
 <td>8:00~8:30</td>
 <td>자 습<br />
-(0蔓︰15 이 후 강 의 실</td>
+(08︰15 이후 강의실 이동)</td>
 </tr>
 <tr class="odd">
 <td>1 교 시</td>
-<td></td>
-<td>국 어 ㅅ<br />
-영 어<br />
-令 對 A<br />
-令 寺 B<br />
-국 어8</td>
+<td>8:30~10:10</td>
+<td>국 어</td>
 </tr>
 <tr class="even">
 <td>2 교 시</td>
 <td>10:30~12:10</td>
-<td>수 학<br />
-수 리<br />
-국 어<br />
-한 국 사<br />
-張 C<br />
-선 택 1<br />
-선 택 1<br />
-선 택<br />
-논 술<br />
-足</td>
+<td>수 학</td>
 </tr>
 <tr class="odd">
 <td>점 심 식 사</td>
@@ -47,21 +34,12 @@
 <tr class="even">
 <td>3 교 시</td>
 <td>13:20~15:00</td>
-<td>영 어<br />
-국 어<br />
-지 1<br />
-생 1<br />
-생 1<br />
-선 택 2<br />
-선 택<br />
-생</td>
+<td>영 어</td>
 </tr>
 <tr class="odd">
-<td>4 切</td>
-<td>15﹕20﹥17﹕00</td>
-<td>수 학<br />
-지 1<br />
-선 택 2</td>
+<td>4 교 시</td>
+<td>15:20~17:00</td>
+<td>수 학</td>
 </tr>
 <tr class="even">
 <td>4.5 교 시</td>
